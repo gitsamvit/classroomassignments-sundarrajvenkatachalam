@@ -1,0 +1,109 @@
+// Online C++ compiler to run C++ program online
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+class IDoorStateNotifier {
+ public:
+    virtual void Notify(string status) = 0;
+};
+
+class Door {
+public:
+	virtual void open(){
+	    cout << "Door open" << endl;
+	}
+	virtual void close() {
+	     cout << "Door Close" << endl;
+	}
+};
+
+class SecureDoor : public Door {
+private:
+    IDoorStateNotifier* notifyref;
+public:
+    SecureDoor(IDoorStateNotifier * notifyrefParam):notifyref{notifyrefParam}{}
+
+    void open() override{
+        this->notifyref->Notify("open");
+    }
+    void close() override{
+        this->notifyref->Notify("close");
+    }
+};
+
+class Buzzer : public IDoorStateNotifier  {
+public:
+	void makeNoise(){
+	    cout << "makeNoise" << endl;
+	}
+	void Notify(string status){
+	    cout << "Buzzer status:" << status << endl;
+	}
+};
+
+class  SMSManager : public IDoorStateNotifier {
+
+	public :
+	void sendNotificationMessage() {
+        cout << "sendNotificationMessage" << endl;
+	 }
+	 void Notify(string status){
+	    cout << "SMSManager status:" << status << endl;
+	}
+};
+
+class VisualizationManager : public IDoorStateNotifier {
+public:
+	void turnVideoOn() {
+	    cout << "turnVideoOn" << endl;
+	}
+    void turnVideoOff() {
+        cout << "turnVideoOff" << endl;
+    }
+    
+    void Notify(string status){
+	    cout << "VisualizationManager status:" << status << endl;
+	}
+};
+
+
+class CompositeNotifier: public IDoorStateNotifier{
+private:
+    vector<IDoorStateNotifier*> notifiers;
+public:
+    void add(IDoorStateNotifier * notifier)
+    {
+        notifiers.push_back(notifier);
+    }
+    
+    void Notify(string status){
+	    for (auto nofifier: notifiers)
+	    {
+	        nofifier -> Notify(status);
+	    }
+	}
+
+};
+
+int main() {
+
+    Door dObj;
+    
+    Buzzer bObj;
+    SMSManager sObj;
+    VisualizationManager vObj;
+    
+    CompositeNotifier comObj;
+    
+    comObj.add(&bObj);
+    comObj.add(&sObj);
+    comObj.add(&vObj);
+    
+    SecureDoor sdl(&comObj);
+    sdl.open();
+    sdl.close();
+
+    return 0;
+}
